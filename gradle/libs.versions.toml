@@ -1,14 +1,14 @@
 [versions]
-agp = "8.1.2"  # Changed to stable version (8.10.0 doesn't exist yet)
-kotlin = "1.9.10"  # Fixed: 2.0.21 doesn't exist (maybe you meant 2.0.0-Beta1)
+agp = "8.1.2"
+kotlin = "1.9.10"
 coreKtx = "1.10.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.8.0"
-composeBom = "2023.10.01"  # Changed to stable version (2024.09.00 doesn't exist yet)
-material3 = "1.1.2"  # Added explicit material3 version
+composeBom = "2023.10.01"
+material3 = "1.1.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -18,8 +18,6 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-
-# Compose UI libraries - most will inherit versions from the BOM
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
