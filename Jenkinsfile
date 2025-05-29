@@ -2,22 +2,42 @@ pipeline {
     agent any
 
     environment {
-        ANDROID_HOME = "/home/ubuntu/android-sdk"
-        PATH = "${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${PATH}"
-        GRADLE_USER_HOME = "${env.WORKSPACE}/.gradle"  // Optional: to avoid permission issues
+        ANDROID_SDK_ROOT = '/home/ubuntu/android-sdk'
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64' // Update path if needed
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clean Workspace') {
             steps {
-                git url: 'https://github.com/girisettyramakrishna/restaurant.git', branch: 'master'
+                cleanWs()
             }
         }
 
-        stage('Prepare SDK') {
+        stage('Checkout SCM') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/master']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/girisettyramakrishna/1234.git',
+                        credentialsId: '' // Add credentials ID if needed
+                    ]],
+                    extensions: [[
+                        $class: 'SubmoduleOption',
+                        disableSubmodules: false,
+                        parentCredentials: true,
+                        recursiveSubmodules: true,
+                        reference: '',
+                        trackingSubmodules: false
+                    ]]
+                ])
+            }
+        }
+
+        stage('Prepare Android SDK') {
             steps {
                 sh '''
-                    echo "sdk.dir=$ANDROID_HOME" > local.properties
+                    echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
                     chmod +x gradlew
                 '''
             }
@@ -25,23 +45,41 @@ pipeline {
 
         stage('Build APK') {
             steps {
-                sh './gradlew clean assembleDebug'
+                sh './gradlew clean assembleDebug --stacktrace --no-daemon'
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: '**/build/outputs/apk/**/*.apk', fingerprint: true
+                }
+                failure {
+                    echo '❌ Build failed! Check the logs for details.'
+                }
             }
         }
 
         stage('Archive APK') {
+            when {
+                expression { currentBuild.result == 'SUCCESS' }
+            }
             steps {
-                archiveArtifacts artifacts: '**/build/outputs/**/*.apk', allowEmptyArchive: false
+                archiveArtifacts artifacts: '**/build/outputs/apk/**/*.apk', fingerprint: true
             }
         }
     }
 
     post {
+        always {
+            echo 'Pipeline completed - sending notifications'
+            // Add notification steps here (email, Slack, etc.)
+        }
+        success {
+            echo '✅ Build succeeded!'
+        }
         failure {
             echo '❌ Build failed!'
         }
-        success {
-            echo '✅ APK built successfully!'
+        unstable {
+            echo '⚠️ Build unstable!'
         }
     }
 }
